@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>zip</title>
+<script src="jquery.js"></script>
+<style type="text/css">
+canvas {
+	margin: 10px;
+}
+</style>
+</head>
+<body>
+	<input id="logoimg" class="addlogo" type="file" multiple
+			accept="image/*" name="imgFile" onchange="readFiles(event)">
+	<divi id="imgs"></div>
+    <divi id="cv"></div>
+	<input type="button" value="提交" onclick="upload()">
+	<script type="text/javascript">
+
+        //上传图片ing通过canvas压缩并显示
+		function readFiles(evt) {
+			var files = evt.target.files;
+			//console.log(files.length);
+			if (!files) {
+				alert("文件不支持");
+				return;
+			}
+
+			for ( var i = 0; i < files.length; i++) {
+				//alert(files[i]);
+                debugger;
+				var imgele = new Image();
+				var thesrc = window.URL.createObjectURL(files[i]);
+				imgele.src = thesrc;
+				imgele.onload = function() {
+					//$("#showlogo").attr("src",this.src);
+// 					var c = document.getElementById("myCanvas");
+// 					c.style.display = "block";
+// 					var cxt = c.getContext("2d");
+// 					cxt.drawImage(this, 0, 0, 200, 200);
+					var canvas = document.createElement("canvas");
+					canvas.setAttribute("id", "myCanvas");
+					canvas.setAttribute("width", "200px");
+					canvas.setAttribute("height", "200px");
+					canvas.setAttribute("onclick", "del(this)");
+					canvas.innerHTML = "你的浏览器不支持";
+					var imgs = document.getElementById("imgs");
+					imgs.appendChild(canvas);
+					var cxt = canvas.getContext("2d");
+					cxt.drawImage(this, 0, 0, 200, 200);
+				}
+			}
+		}
+
+		function del(view) {
+			$(view).remove();
+		}
+        //上传图片
+		function upload() {
+			$.each($("canvas"), function(i){
+				//alert(i);
+				var canvas = this;
+				//将图像输出为base64压缩的字符串  默认为image/png
+				var data = canvas.toDataURL("image/jpeg");
+				//alert(data);
+				//删除字符串前的提示信息 "data:image/png;base64,"
+				//var b64 = data.substring(23);
+				var b64 = data.split(",")[1];
+				//POST到服务器上，生成图片
+				//alert(b64);
+	 			$.post("uploadOperate.php", {
+	 				imgData : b64,
+	 				imgName : i + ".jpeg"
+	 				}, function(response) {
+	 					//alert(response);
+	 			});
+			});
+		}
+
+        //在canvas加载入普通图片
+        function drawBeauty(beauty){
+            var canvas = document.createElement("canvas");
+            canvas.setAttribute("id", "myCanvas");
+            canvas.setAttribute("width", "200px");
+            canvas.setAttribute("height", "200px");
+            canvas.setAttribute("onclick", "del(this)");
+            canvas.innerHTML = "你的浏览器不支持";
+            var imgs = document.getElementById("cv");
+            imgs.appendChild(canvas);
+            var cxt = canvas.getContext("2d");
+            cxt.drawImage(beauty, 0, 0, 200, 200);
+        }
+        function load(){
+            var beauty = new Image();
+            //beauty.src = "./canvas.png";
+            beauty.src = "http://localhost:63343/WWW/SELF/WEBFunction/uploadImage/1/canvas.png";
+           // debugger;
+            if(beauty.complete){
+                drawBeauty(beauty);
+            }else{
+                beauty.onload = function(){
+                    drawBeauty(beauty);
+                };
+                beauty.onerror = function(){
+                    window.alert('image加载失败，请重试');
+                };
+            };
+        }//load
+        if (document.all) {
+            window.attachEvent('onload', load);
+        }else {
+            window.addEventListener('load', load, false);
+        }
+	</script>
+</body>
+</html>
